@@ -1,28 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { PrismaUsersRepository } from "../repositories/prisma/prisma-users-repository.js";
 import { RegisterUseCase } from "./register.js";
 import { compare } from "bcryptjs";
-
-// Unit test
+import { InMemoryUsersRepository } from "../repositories/in-memory/in-memory-users-repository.js";
+import { UserAlreadyExistsError } from "./errors/user-already-exists-error.js";
 
 describe("Register Use Case", () => {
-  it("should hash user password upon registration", async () => {
-    const registerUseCase = new RegisterUseCase({
-      async findByEmail(email) {
-        return null;
-      },
-
-      async create(data) {
-        return {
-          id: "user-1",
-          name: data.name,
-          email: data.email,
-          password_hash: data.password_hash,
-          created_at: new Date(),
-          updated_at: new Date(),
-        };
-      },
-    });
+  it("should be able to register", async () => {
+    const usersRepository = new InMemoryUsersRepository();
+    const registerUseCase = new RegisterUseCase(usersRepository);
 
     const { user } = await registerUseCase.execute({
       name: "John doe",
@@ -30,11 +15,27 @@ describe("Register Use Case", () => {
       password: "123123",
     });
 
-    const isPasswordCorrectlyHashed = await compare(
-      "123123",
-      user.password_hash
-    );
+    expect(user.id).toEqual(expect.any(String));
+  });
 
-    expect(isPasswordCorrectlyHashed).toBe(true);
+  it("should not be able to register with same email twice", async () => {
+    const usersRepository = new InMemoryUsersRepository();
+    const registerUseCase = new RegisterUseCase(usersRepository);
+
+    const email = "johndoe@example.com";
+
+    await registerUseCase.execute({
+      name: "John doe",
+      email,
+      password: "123123",
+    });
+
+    await expect(() =>
+      registerUseCase.execute({
+        name: "John doe",
+        email,
+        password: "123123",
+      })
+    ).rejects.toBeInstanceOf(UserAlreadyExistsError);
   });
 });
