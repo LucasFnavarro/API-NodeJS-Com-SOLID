@@ -1,7 +1,4 @@
-import { compare } from "bcryptjs";
-import type { usersRepository } from "../repositories/users-repository.js";
-import { InvalidCredentialsError } from "./errors/invalid-credentials-error.js";
-import type { CheckIn, User } from "../generated/prisma/index.js";
+import type { CheckIn } from "../generated/prisma/index.js";
 import type { CheckInsRepository } from "../repositories/check-ins-repository.js";
 
 interface CheckInUseCaseRequest {

@@ -21,6 +21,10 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
       email,
       password,
     });
+
+    return reply.status(201).send({
+      message: "User created successfully",
+    });
   } catch (err) {
     if (err instanceof UserAlreadyExistsError) {
       return reply.status(409).send(err.message);
@@ -28,8 +32,4 @@ export async function register(request: FastifyRequest, reply: FastifyReply) {
 
     return reply.status(500).send();
   }
-
-  return reply.status(201).send({
-    message: "User created successfully",
-  });
 }
