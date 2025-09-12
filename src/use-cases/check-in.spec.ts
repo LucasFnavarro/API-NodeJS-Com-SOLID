@@ -5,13 +5,13 @@ import { CheckInUseCase } from "./check-in.js";
 // const usersRepository = new InMemoryUsersRepository();
 // const registerUseCase = new RegisterUseCase(usersRepository);
 
-let checkInsRepository: InMemoryCheckInsRepository;
+let checkInRepository: InMemoryCheckInsRepository;
 let sut: CheckInUseCase;
 
-describe("Check In Use Case", () => {
+describe("Check-in Use Case", () => {
   beforeEach(() => {
-    checkInsRepository = new InMemoryCheckInsRepository();
-    sut = new CheckInUseCase(checkInsRepository);
+    checkInRepository = new InMemoryCheckInsRepository();
+    sut = new CheckInUseCase(checkInRepository);
 
     vi.useFakeTimers();
   });
@@ -21,33 +21,47 @@ describe("Check In Use Case", () => {
   });
 
   it("should be able to check in", async () => {
-    vi.setSystemTime(new Date(2025, 8, 5, 8, 0, 0));
+    vi.setSystemTime(new Date(2025, 8, 9, 8, 0, 0));
 
     const { checkIn } = await sut.execute({
       gymId: "gym-01",
       userId: "user-01",
     });
 
-    console.log(checkIn.created_at);
-
     expect(checkIn.id).toEqual(expect.any(String));
   });
 
-  // red, green, refactor (passos do TDD)
-
-  it("should not be able to check in twice in the same day", async () => {
-    vi.setSystemTime(new Date(2025, 8, 5, 8, 0, 0));
+  it("should be able to check in twice in the same day", async () => {
+    vi.setSystemTime(new Date(2025, 8, 9, 8, 0, 0));
 
     await sut.execute({
       gymId: "gym-01",
       userId: "user-01",
     });
 
-    await expect(() =>
+    await expect(
       sut.execute({
         gymId: "gym-01",
         userId: "user-01",
       })
     ).rejects.toBeInstanceOf(Error);
+  });
+
+  it("should be able to check in twice but in different days", async () => {
+    vi.setSystemTime(new Date(2025, 8, 10, 8, 0, 0));
+
+    await sut.execute({
+      gymId: "gym-01",
+      userId: "user-01",
+    });
+
+    vi.setSystemTime(new Date(2025, 8, 9, 8, 0, 0));
+
+    const { checkIn } = await sut.execute({
+      gymId: "gym-01",
+      userId: "user-01",
+    });
+
+    expect(checkIn.id).toEqual(expect.any(String));
   });
 });

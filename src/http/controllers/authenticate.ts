@@ -22,15 +22,17 @@ export async function authenticate(
       email,
       password,
     });
+
+    return reply.status(201).send({
+      message: "User logged successfully",
+    });
   } catch (err) {
     if (err instanceof InvalidCredentialsError) {
       return reply.status(400).send({ message: err.message });
     }
 
-    return reply.status(500).send();
+    return reply.status(500).send({
+      message: "Internal server error",
+    });
   }
-
-  return reply.status(201).send({
-    message: "User created successfully",
-  });
 }

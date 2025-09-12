@@ -5,5 +5,5 @@ import { authenticate } from "./controllers/authenticate.js";
 export async function appRoutes(app: FastifyInstance) {
   app.post("/users", register);
 
-  app.post("/session", authenticate);
+  app.post("/sessions", authenticate);
 }
